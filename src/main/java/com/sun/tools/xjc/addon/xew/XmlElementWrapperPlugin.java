@@ -626,9 +626,15 @@ public class XmlElementWrapperPlugin extends AbstractConfigurablePlugin {
 
 			// FIXME: Make a try to load constants and (a) rename it appropriately (b) use it?
 			JInvocation qname = JExpr._new(codeModel.ref(QName.class)).arg(info.namespace).arg(info.name);
+			JClass declaredType = info.type.boxify();
+			JExpression declaredTypeClass = declaredType.dotclass();
+			List<JClass> typeParameters = declaredType.getTypeParameters();
+			if (typeParameters != null && !typeParameters.isEmpty()) {
+				declaredTypeClass = JExpr.cast(codeModel.ref(Class.class), declaredTypeClass);
+			}
 
-			method.body()._return(JExpr._new(wrapperType).arg(qname).arg(info.type.boxify().dotclass())
-			            .arg(targetClass.dotclass()).arg(method.param(info.type, "value")));
+			method.body()._return(JExpr._new(wrapperType).arg(qname).arg(declaredTypeClass).arg(targetClass.dotclass())
+			            .arg(method.param(info.type, "value")));
 
 			createdMethods++;
 		}
